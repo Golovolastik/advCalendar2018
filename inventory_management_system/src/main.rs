@@ -3,8 +3,7 @@ use std::collections::HashMap;
 fn main() {
     let data = fs::read_to_string("input.txt").expect("REASON");
     star_one(&data);
-    let number_of_lines = count_number_of_lines(&data);
-    println!("{}", number_of_lines);
+    star_two(&data);
 }
 
 fn star_one(data: &String){
@@ -58,27 +57,65 @@ fn compare_strings(str1: &str, str2: &str) -> bool {
 
 fn star_two(data: &String) {
     let number_of_lines = count_number_of_lines(data);
+    println!("{number_of_lines}");
     let mut string_outer = data.lines();
-    let mut string_inner = data.lines();
-    string_inner.next();
-    for i in 0..number_of_lines {
-        let outer = string_outer.next().unwrap_or(break);
-        for j in i+1..=number_of_lines {
-            let inner = string_inner.next().unwrap_or(break);
-            for c in 0..outer.len() {
-                todo!()
+    for i in 0..number_of_lines - 2 {
+        let outer = string_outer.next().unwrap();
+        let mut string_inner = string_outer.clone();
+        string_inner.next();
+        for j in i+1..number_of_lines - 1 {
+            let inner = string_inner.next().unwrap();
+            if compare_strings(outer, inner) {
+                println!("{}", common_chars(outer, inner));
             }
         }
+        
     }
+}
+
+fn common_chars(str1: &str, str2: &str) -> String {
+    if str1.len() != str2.len() {
+        panic!("Different length of strings");
+    }
+    let mut result = String::new();
+        let mut iter1 = str1.chars();
+        //let mut iter2 = str2.chars();
+        for c in str2.chars() {
+            if iter1.next().unwrap() == c {
+                result.push(c);
+            }
+        }
+    result
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::compare_strings;
+    use crate::{compare_strings, count_number_of_lines, common_chars};
+    use std::fs;
 
     #[test]
     fn two_strings() {
         assert_eq!(compare_strings("hello", "hello"), true);
-        
+        assert_eq!(compare_strings("hello", "bello"), true);
+        assert_eq!(compare_strings("hello", "hedlo"), true);
+        assert_eq!(compare_strings("hello", "bedlo"), false);
+        assert_eq!(compare_strings("hello", "bye"), false);
+    }
+
+    #[test]
+    fn check_lines() {
+        let data = fs::read_to_string("test_lines.txt").expect("REASON");
+        assert_eq!(count_number_of_lines(&data), 5);
+    }
+
+    #[test]
+    fn check_common() {
+        assert_eq!(common_chars("fghij", "fguij"), "fgij");
+    }
+
+    #[test]
+    #[should_panic]
+    fn check_common_different_length() {
+        common_chars("fghij", "fguijsfd");
     }
 }
